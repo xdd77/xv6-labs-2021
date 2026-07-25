@@ -120,6 +120,11 @@ found:
   p->pid = allocpid();
   p->state = USED;
 
+
+  p->tracemask = 0; // Initialize tracemask to 0 (no tracing)
+
+
+
   // Allocate a trapframe page.
   if((p->trapframe = (struct trapframe *)kalloc()) == 0){
     freeproc(p);
@@ -295,6 +300,7 @@ fork(void)
   // Cause fork to return 0 in the child.
   np->trapframe->a0 = 0;
 
+  np->tracemask = p->tracemask; // Inherit tracemask from parent
   // increment reference counts on open file descriptors.
   for(i = 0; i < NOFILE; i++)
     if(p->ofile[i])
@@ -653,4 +659,18 @@ procdump(void)
     printf("%d %s %s", p->pid, state, p->name);
     printf("\n");
   }
+}
+uint64 
+nproc(void)
+{
+  struct proc *p;
+  uint64 count = 0;
+  for(p = proc;p<&proc[NPROC];p++)
+  {
+    acquire(&p->lock);
+    if(p->state != UNUSED)
+      count++;
+    release(&p->lock);
+  }
+  return count;
 }
