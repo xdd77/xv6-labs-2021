@@ -85,7 +85,8 @@ enum procstate { UNUSED, USED, SLEEPING, RUNNABLE, RUNNING, ZOMBIE };
 // Per-process state
 struct proc {
   struct spinlock lock;
-
+  //=======加入一个指针类型的变量是，只是一个优化后存放pid的内存virtual memary
+  struct usyscall *usyscall;
   // p->lock must be held when using these:
   enum procstate state;        // Process state
   void *chan;                  // If non-zero, sleeping on chan

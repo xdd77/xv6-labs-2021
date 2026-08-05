@@ -432,3 +432,55 @@ copyinstr(pagetable_t pagetable, char *dst, uint64 srcva, uint64 max)
     return -1;
   }
 }
+void
+vmprint_walk(pagetable_t pagetable,int level){
+  for(int i = 0; i < 512;i++)
+  {
+    pte_t pte = pagetable[i];
+    if(pte & PTE_V)
+    {
+      for(int j =0;j<3-level;j++)
+              printf(" ..");
+      printf("%d: pte %p pa %p\n",
+            i,
+            pte,
+          PTE2PA(pte));
+      if(level > 0&&(pte & (PTE_R|PTE_W|PTE_X)) == 0)
+      {
+        vmprint_walk((pagetable_t)PTE2PA(pte),level - 1);
+      }
+    }
+  }
+
+}
+
+void vmprint(pagetable_t pagetable)
+{
+  printf("page table %p\n",pagetable);
+  vmprint_walk(pagetable,2);
+}
+
+
+
+
+
+int vm_pgaccess(pagetable_t pagetable,uint64 va){
+  pte_t *pte;
+
+
+  if(va >= MAXVA)
+    return 0;
+
+  pte = walk(pagetable, va, 0);
+  if(pte == 0)
+    return 0;
+  if((*pte & PTE_V) == 0)
+    return 0;
+  if((*pte & PTE_A)!= 0)
+  {
+    *pte = *pte & (~PTE_A); //PTE & ~011111 ->PTE's 6th bit set 0   
+    return 1;
+  }
+  // pa = PTE2PA(*pte);
+  return 0;
+}

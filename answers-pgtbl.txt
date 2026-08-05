@@ -1,0 +1,4 @@
+Page 0 contains the first page of the user program's text segment.
+Page 2 contains part of the user program's text/data segment.
+No. The page does not have the PTE_U bit set, so user mode cannot access it.
+The third-to-last page contains the USYSCALL page.
