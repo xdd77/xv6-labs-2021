@@ -1,60 +1,39 @@
 # xv6-labs-2021 学习记录
 
-这是我的 MIT 6.S081 Operating System Engineering 学习仓库。
+这是我的 MIT 6.S081（Operating System Engineering）学习仓库。
 
-通过完成 MIT xv6 labs，逐步理解操作系统核心机制，并记录源码分析、实验思考和调试过程。
+我按照课程官方安排逐步学习 xv6，通过完成实验理解操作系统的进程、系统调用、虚拟内存、陷阱、并发和文件系统，并在学习笔记中记录实现思路、问题与调试过程。
 
-课程主页：
-https://pdos.csail.mit.edu/6.S081/2021/
+- [MIT 6.S081 2021 课程主页](https://pdos.csail.mit.edu/6.S081/2021/)
+- [课程安排](https://pdos.csail.mit.edu/6.S081/2021/schedule.html)
 
-## Learning Progress
+## 学习进度
 
-- [x] Lab1 util - Unix utilities
-  - 学习笔记：`docs/Lab1_Unix_utilities_学习笔记.docx`
-- [x] Lab2 syscall - System calls
-  - 学习笔记：`docs/Lab2_Sysinfo_实现与源码理解指南.docx`
-- [x] Lab3 pgtbl - Page tables
-  - 学习笔记：`docs/Lab3_Page_tables_实现与源码理解指南.docx`
-- [ ] Lab4 traps - Trap mechanisms
-- [ ] Lab5 lazy - Lazy allocation
-- [ ] Lab6 cow - Copy-on-write fork
-- [ ] Lab7 thread - Multithreading
-- [ ] Lab8 lock - Kernel locks
-- [ ] Lab9 fs - File system
-- [ ] Lab10 mmap - Memory mapping
+- [x] **Lab 1：Unix utilities** — [📘 学习笔记](docs/Lab1_Unix_utilities_学习笔记.docx)
+- [x] **Lab 2：System calls** — [📘 Sysinfo 实现与源码理解指南](docs/Lab2_Sysinfo_实现与源码理解指南.docx)
+- [ ] **Lab 3：Page tables（学习中）** — [📘 页表实现与源码理解指南](docs/Lab3_Page_tables_实现与源码理解指南.docx)
+- [ ] Lab 4：Traps
+- [ ] Lab 5：Lazy allocation
+- [ ] Lab 6：Copy-on-write fork
+- [ ] Lab 7：Multithreading
+- [ ] Lab 8：Locks
+- [ ] Lab 9：File system
+- [ ] Lab 10：mmap
 
-## 学习重点
+## 当前学习重点
 
-### Lab1 util
+### Lab 1：Unix utilities
 
-- fork / exec / wait
-- pipe 进程通信
-- 用户程序与系统调用接口
+`fork`、`exec`、`wait`、`pipe`、进程流水线、目录递归与用户程序设计。
 
-### Lab2 syscall
+### Lab 2：System calls
 
-- 用户态到内核态切换
-- syscall 分发流程
-- trapframe
-- 用户地址与内核地址交互
+用户态到内核态的系统调用路径、系统调用分发、参数获取、`copyout`、进程表与空闲内存统计。
 
-### Lab3 pgtbl
+### Lab 3：Page tables
 
-- RISC-V Sv39 三级页表
-- VA -> PTE -> PA
-- walk / mappages
-- vmprint
-- TRAMPOLINE、TRAPFRAME、USYSCALL
-- PTE_A 与 pgaccess
+RISC-V Sv39 三级页表、VA → PTE → PA、`walk`、`mappages`、`vmprint`、TRAMPOLINE、TRAPFRAME、USYSCALL、PTE_A 与 `pgaccess`。
 
-## 后续目标
+## 说明
 
-继续按照 MIT 6.S081 官方实验顺序学习 xv6：
-
-1. Trap 机制
-2. 进程切换
-3. 虚拟内存优化
-4. 并发与锁
-5. 文件系统
-
-目标：通过 xv6 源码理解现代操作系统设计思想。
+各实验代码保存在对应分支，默认分支的 README 与 `docs/` 用于汇总整个课程的学习进度和笔记。
