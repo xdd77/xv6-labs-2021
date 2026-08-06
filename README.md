@@ -13,7 +13,7 @@
 
 - [x] **Lab 2：System calls** —  [lab2笔记1](https://github.com/user-attachments/files/30769431/xv6_lab2_trace_notes_cn.docx)
 [lab2笔记2](https://github.com/user-attachments/files/30769430/xv6_Lab2_sysinfo_.docx)
-- [ ] **Lab 3：Page tables（学习中）** — 
+- [x] **Lab 3：Page tables（学习中）** — [xv6_Lab3_Page_tables_完整回顾与实现推导指南.docx](https://github.com/user-attachments/files/30776201/xv6_Lab3_Page_tables_.docx)
 - [ ] Lab 4：Traps
 - [ ] Lab 5：Lazy allocation
 - [ ] Lab 6：Copy-on-write fork
