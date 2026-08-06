@@ -9,9 +9,11 @@
 
 ## 学习进度
 
-- [x] **Lab 1：Unix utilities** — [📘 学习笔记](docs/Lab1_Unix_utilities_学习笔记.docx)
-- [x] **Lab 2：System calls** — [📘 Sysinfo 实现与源码理解指南](docs/Lab2_Sysinfo_实现与源码理解指南.docx)
-- [ ] **Lab 3：Page tables（学习中）** — [📘 页表实现与源码理解指南](docs/Lab3_Page_tables_实现与源码理解指南.docx)
+- [x] **Lab 1：Unix utilities** 
+
+- [x] **Lab 2：System calls** —  [lab2笔记1](https://github.com/user-attachments/files/30769431/xv6_lab2_trace_notes_cn.docx)
+[lab2笔记2](https://github.com/user-attachments/files/30769430/xv6_Lab2_sysinfo_.docx)
+- [ ] **Lab 3：Page tables（学习中）** — 
 - [ ] Lab 4：Traps
 - [ ] Lab 5：Lazy allocation
 - [ ] Lab 6：Copy-on-write fork
