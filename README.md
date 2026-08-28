@@ -14,7 +14,7 @@
 - [x] **Lab 2：System calls** —  [lab2笔记1](https://github.com/user-attachments/files/30769431/xv6_lab2_trace_notes_cn.docx)
 [lab2笔记2](https://github.com/user-attachments/files/30769430/xv6_Lab2_sysinfo_.docx)
 - [x] **Lab 3：Page tables（学习中）** — [Lab3笔记](https://github.com/user-attachments/files/30776201/xv6_Lab3_Page_tables_.docx)
-- [ ] Lab 4：Traps
+- [x] Lab 4：Traps  [Lab 4.docx](https://github.com/user-attachments/files/31552432/Traps.docx)
 - [ ] Lab 5：Lazy allocation
 - [ ] Lab 6：Copy-on-write fork
 - [ ] Lab 7：Multithreading
@@ -35,6 +35,9 @@
 ### Lab 3：Page tables
 
 RISC-V Sv39 三级页表、VA → PTE → PA、`walk`、`mappages`、`vmprint`、TRAMPOLINE、TRAPFRAME、USYSCALL、PTE_A 与 `pgaccess`。
+###Lab 4:Trap
+
+类似于中断，在遇到一些syscall等都会陷入新的需要执行的trap中，这个地方需要重点的去掌握 secp等寄存器的作用，以及proc.h中我们为进程初始化添加了新的属性，其中我觉得理解trapframe是必要的，trapframe负责新建一块新的地址空间，我们可以在这一块新的内存中去为sys的trap中处理中间的一些寄存器的备份，以便于返回主程序时可以正常运行。
 
 ## 说明
 
