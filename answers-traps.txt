@@ -1,0 +1,413 @@
+MIT 6.S081 Lab: Traps
+RISC-V Assembly Questions Answers
+RISC-V 汇编问题答案（中英对照）
+
+==================================================
+Q1:
+Which registers contain arguments to functions?
+For example, which register holds 13 in main's call to printf?
+
+函数参数存放在哪些寄存器中？
+例如，在 main 调用 printf 时，13 存放在哪个寄存器？
+
+Answer / 答案:
+
+RISC-V uses registers a0-a7 to pass function arguments.
+RISC-V 使用 a0-a7 寄存器传递函数参数。
+
+For / 对于：
+
+printf("%d %d\n", f(8)+1, 13);
+
+the arguments are approximately:
+参数大致为：
+
+a0 = address of "%d %d\n"
+a0 = 字符串 "%d %d\n" 的地址
+
+a1 = f(8)+1 = 12
+a1 = f(8)+1 = 12
+
+a2 = 13
+a2 = 13
+
+Therefore, 13 is stored in register a2.
+因此，13 存放在 a2 寄存器中。
+
+
+==================================================
+Q2:
+Where is the call to function f in the assembly code for main?
+Where is the call to function g in the assembly code for f?
+
+main 的汇编代码中，哪里调用了函数 f？
+f 的汇编代码中，哪里调用了函数 g？
+
+Answer / 答案:
+
+There may be no actual call instructions to f or g.
+汇编代码中可能根本没有真正调用 f 或 g 的指令。
+
+The compiler can optimize these calls.
+编译器会对这些函数调用进行优化。
+
+For example:
+例如：
+
+g(8) = 8 + 3 = 11
+f(8) = 11
+f(8) + 1 = 12
+
+Therefore, the compiler may directly put 12 into a1.
+因此，编译器可能直接把 12 放入 a1，而不真正调用 f 和 g。
+
+So you may not see instructions such as:
+
+call f
+call g
+
+原因是 compiler optimization / inlining。
+也就是编译器优化、函数内联，或者直接进行了常量计算。
+
+
+==================================================
+Q3:
+At what address is printf located?
+
+printf 位于什么地址？
+
+Answer / 答案:
+
+The exact address should be checked in user/call.asm.
+具体地址应该查看当前编译生成的 user/call.asm。
+
+Run / 可以运行：
+
+grep "<printf>" user/call.asm
+
+For example / 例如：
+
+0000000000000630 <printf>:
+
+Then:
+那么：
+
+printf address = 0x630
+
+The exact address depends on the current build.
+具体地址可能因为编译器、代码版本等不同而变化。
+
+所以实验答案应该填写你自己的 call.asm 中实际看到的地址。
+
+
+==================================================
+Q4:
+What value is in register ra just after the jalr to printf in main?
+
+main 中执行跳转到 printf 的 jalr 之后，ra 寄存器中是什么值？
+
+Answer / 答案:
+
+ra stores the return address.
+ra 保存返回地址。
+
+Suppose:
+假设：
+
+0x30: ...
+0x34: jalr ...
+0x38: ...
+
+When jalr at 0x34 executes:
+当 0x34 的 jalr 执行时：
+
+ra = 0x38
+
+Because 0x38 is the address of the next instruction.
+因为 0x38 是 jalr 后面的下一条指令地址。
+
+When printf finishes and executes ret:
+当 printf 最后执行 ret 时：
+
+PC = ra
+
+Therefore the program returns to 0x38.
+所以程序会返回到 0x38 继续执行。
+
+可以理解为：
+
+jal/jalr
+    ↓
+把“回来以后从哪里继续执行”保存到 ra
+    ↓
+跳转到目标函数
+    ↓
+目标函数 ret
+    ↓
+使用 ra 返回
+
+
+==================================================
+Q5:
+What is the output of:
+
+下面代码输出什么？
+
+unsigned int i = 0x00646c72;
+printf("H%x Wo%s", 57616, &i);
+
+Answer / 答案:
+
+First:
+首先：
+
+57616 decimal = 0xE110
+
+所以：
+
+H%x
+
+会打印：
+
+HE110
+
+如果当前 printf 使用小写十六进制字符，则可能是：
+
+He110
+
+
+Now consider:
+再看：
+
+i = 0x00646c72
+
+RISC-V is little-endian.
+RISC-V 是小端序（little-endian）。
+
+因此这个 32-bit 整数在内存中从低地址到高地址排列为：
+
+0x72  0x6c  0x64  0x00
+
+ASCII:
+
+0x72 = 'r'
+0x6c = 'l'
+0x64 = 'd'
+0x00 = '\0'
+
+所以：
+
+(char *)&i
+
+作为字符串读取时得到：
+
+"rld"
+
+而格式字符串里前面已经有：
+
+"Wo"
+
+所以最终：
+
+HE110 World
+
+如果 printf 的十六进制使用小写：
+
+He110 World
+
+
+==================================================
+Q5-extra:
+If RISC-V were big-endian, what value should i have to print the same string?
+
+如果 RISC-V 是大端序，为了仍然打印同样的字符串，i 应该是多少？
+
+Answer / 答案:
+
+We still want memory from low address to high address to contain:
+
+我们仍然希望内存从低地址到高地址是：
+
+0x72  0x6c  0x64  0x00
+  r     l     d    \0
+
+For big-endian:
+对于大端序：
+
+the most significant byte is stored at the lowest address.
+最高有效字节存放在最低地址。
+
+Therefore:
+
+i = 0x726c6400
+
+这样内存中才会排列为：
+
+72 6c 64 00
+
+The value 57616 does not need to change.
+57616 不需要改变。
+
+原因：
+
+Endianness affects how a multi-byte value is arranged in memory.
+大小端只影响多字节数据在内存中的排列方式。
+
+It does not change the mathematical value of the integer.
+它不会改变整数本身的数值。
+
+所以：
+
+i:
+0x00646c72
+→ big-endian 时改为
+0x726c6400
+
+57616:
+不需要改变。
+
+
+==================================================
+Q6:
+What will the following code print?
+
+下面代码会打印什么？
+
+printf("x=%d y=%d", 3);
+
+Answer / 答案:
+
+The first %d gets the argument 3.
+第一个 %d 会取得参数 3。
+
+So:
+
+x = 3
+
+这是确定的。
+
+However, the format string requires two integer arguments:
+
+但是格式字符串需要两个整数参数：
+
+%d
+%d
+
+while only one integer argument was supplied:
+
+实际只传入：
+
+3
+
+So the second %d will still try to fetch another argument.
+因此第二个 %d 仍然会尝试读取下一个参数。
+
+For example, according to the calling convention:
+
+例如按照 RISC-V 参数寄存器：
+
+a0 = format string
+a1 = 3
+a2 = ???
+
+a2 并没有被正确设置成 printf 的第二个整数参数。
+
+因此：
+
+y = undefined / unpredictable value
+
+也就是：
+
+x=3 y=<不确定的值>
+
+不能给出一个固定的 y。
+
+这是未定义行为（undefined behavior）。
+
+
+==================================================
+Summary / 总结
+
+1. RISC-V function arguments:
+   RISC-V 函数参数：
+
+   a0-a7
+
+
+2. For:
+
+   printf("%d %d\n", 12, 13);
+
+   registers are:
+
+   a0 = format string address
+   a1 = 12
+   a2 = 13
+
+   所以 13 在 a2。
+
+
+3. f and g may not actually be called because of compiler optimization.
+
+   f、g 可能因为编译器优化而没有真正发生函数调用。
+
+
+4. ra stores the return address.
+
+   ra 保存返回地址。
+
+   jal/jalr 会更新 ra，
+   ret 根据 ra 返回。
+
+
+5. RISC-V is little-endian.
+
+   RISC-V 是小端序。
+
+   0x00646c72
+
+   在内存中：
+
+   72 6c 64 00
+
+   对应：
+
+   "rld"
+
+
+6. If too few arguments are passed to printf:
+
+   如果 printf 参数数量比格式字符串要求的少：
+
+   后面的格式符会读取未定义的数据。
+
+   因此结果不可预测。
+
+
+==================================================
+Connection to the Traps Lab / 和后续 Trap Lab 的联系
+
+a0-a7
+→ 系统调用参数为什么保存在 trapframe->a0 ~ a7
+
+ra
+→ backtrace 为什么可以通过 saved ra 找到返回地址
+
+s0/fp
+→ backtrace 为什么可以沿着 stack frame 向上找
+
+epc / PC
+→ alarm 为什么修改 trapframe->epc 就能让程序去执行 handler
+
+register state
+→ sigreturn 为什么必须恢复整个 trapframe
+
+所以这些汇编问题其实是在给后面的：
+
+backtrace
+alarm
+trapframe
+usertrap
+sigreturn
+
+做准备。
