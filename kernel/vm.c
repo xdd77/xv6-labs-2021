@@ -303,7 +303,7 @@ uvmcopy(pagetable_t old, pagetable_t new, uint64 sz)
   pte_t *pte;
   uint64 pa, i;
   uint flags;
-  char *mem;
+  // char *mem;
 
   for(i = 0; i < sz; i += PGSIZE){
     if((pte = walk(old, i, 0)) == 0)
@@ -312,13 +312,21 @@ uvmcopy(pagetable_t old, pagetable_t new, uint64 sz)
       panic("uvmcopy: page not present");
     pa = PTE2PA(*pte);
     flags = PTE_FLAGS(*pte);
-    if((mem = kalloc()) == 0)
-      goto err;
-    memmove(mem, (char*)pa, PGSIZE);
-    if(mappages(new, i, PGSIZE, (uint64)mem, flags) != 0){
-      kfree(mem);
+    if(flags & PTE_W)
+    {
+      flags &= ~PTE_W;
+      flags |= PTE_COW;
+      *pte = PA2PTE(pa) | flags;
+    }
+    // if((mem = kalloc()) == 0)
+    //   goto err;
+    // memmove(mem, (char*)pa, PGSIZE);
+    if(mappages(new, i, PGSIZE, pa, flags) != 0){
+
+      // kfree(mem);
       goto err;
     }
+    krefinc(pa);
   }
   return 0;
 
@@ -350,6 +358,16 @@ copyout(pagetable_t pagetable, uint64 dstva, char *src, uint64 len)
 
   while(len > 0){
     va0 = PGROUNDDOWN(dstva);
+    if(va0 >= MAXVA)
+      return -1;
+    pte_t * pte;
+    pte = walk(pagetable,va0,0);
+    if(pte == 0)
+      return -1;
+    if(*pte & PTE_COW){
+      if(cowfault(pagetable,va0) < 0)
+        return -1;
+    }
     pa0 = walkaddr(pagetable, va0);
     if(pa0 == 0)
       return -1;
@@ -431,4 +449,60 @@ copyinstr(pagetable_t pagetable, char *dst, uint64 srcva, uint64 max)
   } else {
     return -1;
   }
+}
+
+//va传入是出现pagefault的va，这里首先找到PGROUNDDOWN()。
+//再找到PTE,同时判断是否存在于合法，以及是否是COW导致的不可写
+//
+int 
+cowfault(pagetable_t pagetable,uint64 va)
+{
+  pte_t *pte;
+  uint64 pa;
+  uint flags;
+  char *mem;
+  va = PGROUNDDOWN(va);
+  pte = walk(pagetable,va,0);//找到va所属虚拟页对应的那条leaf PTE
+  if(pte == 0)
+  {
+    return -1;
+  }
+  if((*pte & PTE_V) == 0)
+  {
+    return -1;
+  }
+  if((*pte & PTE_U) == 0)
+  {
+    return -1;
+  }
+  if((*pte & PTE_COW) == 0)
+  {
+    return -1;
+  }
+  pa = PTE2PA(*pte);//从leaf PTE 得到地址pa
+  flags = PTE_FLAGS(*pte);//取的是这条映射的权限
+
+  if(krefcnt(pa) == 1)
+  {
+    flags |= PTE_W;//此时只有子进程一个使用者所以改成可写
+    flags &= ~PTE_COW;//“这个页从 COW 只读页，恢复成普通可写页。”
+    *pte = PA2PTE(pa) | flags;
+    return 0;
+  }
+
+  // 这时候如果都在使用进程，则需要kalloc新的空间将parent的pa空间复制给child
+
+  mem = kalloc();
+  if(mem == 0)
+  {
+    return  -1;
+  }
+  memmove(mem,(char*)pa,PGSIZE);
+  //现在是 child 自己的 private page，所以允许 child 写，并取消 COW
+  flags |= PTE_W;
+  flags &= ~PTE_COW;
+  //让child的leafpte变成自己的pa地址页的映射了
+  *pte = PA2PTE((uint64)mem) | flags;//修改：当前进程中，va 所属这个虚拟页的映射
+  kfree((void*)pa);
+  return 0;
 }
